@@ -1,8 +1,12 @@
+
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Button, Dimensions } from 'react-native';
 import { Magnetometer, Accelerometer } from 'expo-sensors';
 import { Feather } from '@expo/vector-icons';
 import * as Location from 'expo-location';
+import { printToFileAsync } from 'expo-print';
+import { shareAsync } from 'expo-sharing';
 
 const LapTimerWithGPS = () => {
   const [timer, setTimer] = useState(0);
@@ -16,7 +20,39 @@ const LapTimerWithGPS = () => {
   const [subscription, setSubscription] = useState(null);
   const [magnetometer, setMagnetometer] = useState(0);
 
+  let generatePdf = async () => {
+    const htmlContent = `
+      <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; }
+            .header { text-align: center; font-size: 24px; margin-bottom: 20px; }
+            .lap { margin-top: 10px; }
+            .lap-header { font-weight: bold; }
+            .lap-times { font-size: 16px; }
+          </style>
+        </head>
+        <body>
+          <div class="header">Lap Times</div>
+          ${laps.map((lap, index) => `
+            <div class="lap">
+              <div class="lap-header">Lap ${index + 1}</div>
+              <div class="lap-times">Time: ${formatTime(lap)} seconds</div>
+              ${index > 0 ? `<div class="lap-times">Difference: ${formatTime(lap - laps[index - 1])} seconds</div>` : ''}
+            </div>
+          `).join('')}
+        </body>
+      </html>
+    `;
+
+    const file = await printToFileAsync({
+      html: htmlContent,
+      base64: false
+    });
   
+    await shareAsync(file.uri);
+  };
+
   useEffect(() => {
     const accelerometerSubscription = Accelerometer.addListener(data => {
       const { x, z } = data;
@@ -163,6 +199,9 @@ const LapTimerWithGPS = () => {
           </TouchableOpacity>
           <TouchableOpacity style={styles.button} onPress={recordLap}>
             <Text style={styles.buttonText}>Lap</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.button} onPress={generatePdf}>
+            <Text style={styles.buttonText}>Export laps</Text>
           </TouchableOpacity>
         </View>
         <View style={styles.lapContainer}>

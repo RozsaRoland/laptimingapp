@@ -15,13 +15,15 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.rroland.laptimingapp"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.rroland.laptimingapp"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -31,6 +33,14 @@
         "projectId": "b3f4ff04-4db3-434b-9765-8ab40afb51e2"
       }
     },
-    "owner": "rroland"
+    "owner": "rroland",
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location."
+        }
+      ]
+    ]
   }
 }
